@@ -1,1 +1,2050 @@
-index.html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Monitoring Bahan Sampel</title>
+
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- CHART.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- SHEETJS / EXCEL -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f9;
+            color: #222;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            margin: 30px auto;
+        }
+
+        /* ================= HEADER ================= */
+
+        header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 15px;
+        }
+
+        .status {
+            margin-top: 15px;
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* ================= SECTION ================= */
+
+        .section-title {
+            font-size: 21px;
+            margin-bottom: 18px;
+        }
+
+        /* ================= MAIN SENSOR ================= */
+
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .sensor-card {
+            background: white;
+            padding: 22px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .sensor-card h3 {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .sensor-value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        /* ================= SAMPLE ================= */
+
+        .sample-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .sample-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+        .sample-card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .sample-card h3 {
+            font-size: 15px;
+            color: #555;
+            margin-bottom: 12px;
+        }
+
+        .sample-value {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        /* ================= CHART ================= */
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .chart-box {
+            position: relative;
+            height: 400px;
+        }
+
+        /* ================= TABLE ================= */
+
+        .table-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        th {
+            background: #f1f3f5;
+        }
+
+        /* ================= EXPORT ================= */
+
+        .export-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .export-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        .input-group input {
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .export-button {
+            margin-top: 15px;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 8px;
+            background: #198754;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .export-button:hover {
+            opacity: 0.9;
+        }
+
+        .export-info {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f1f3f5;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        /* ================= FOOTER ================= */
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 13px;
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 1100px) {
+
+            .sensor-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .sample-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .export-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            .sensor-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sample-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .export-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 22px;
+            }
+
+            .sensor-value {
+                font-size: 27px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- ================= HEADER ================= -->
+
+    <header>
+
+        <h1>Monitoring Bahan Sampel</h1>
+
+        <p>
+            Monitoring data konduktivitas sampel dan parameter lingkungan
+            secara real-time
+        </p>
+
+        <div id="connectionStatus" class="status offline">
+            OFFLINE
+        </div>
+
+    </header>
+
+
+    <!-- ================= PARAMETER UTAMA ================= -->
+
+    <h2 class="section-title">
+        Parameter Utama
+    </h2>
+
+    <div class="sensor-grid">
+
+        <!-- TEGANGAN -->
+
+        <div class="sensor-card">
+
+            <h3>
+                Tegangan
+            </h3>
+
+            <div class="sensor-value">
+                <span id="tegangan">
+                    --
+                </span>
+                V
+            </div>
+
+        </div>
+
+
+        <!-- ARUS -->
+
+        <div class="sensor-card">
+
+            <h3>
+                Arus
+            </h3>
+
+            <div class="sensor-value">
+                <span id="arus">
+                    --
+                </span>
+                A
+            </div>
+
+        </div>
+
+
+        <!-- SUHU -->
+
+        <div class="sensor-card">
+
+            <h3>
+                Suhu
+            </h3>
+
+            <div class="sensor-value">
+                <span id="suhu">
+                    --
+                </span>
+                °C
+            </div>
+
+        </div>
+
+
+        <!-- PH -->
+
+        <div class="sensor-card">
+
+            <h3>
+                pH
+            </h3>
+
+            <div class="sensor-value">
+                <span id="ph">
+                    --
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= SAMPEL ================= -->
+
+    <div class="sample-section">
+
+        <h2 class="section-title">
+            Konduktivitas Bahan Sampel
+        </h2>
+
+        <div class="sample-grid">
+
+            <div class="sample-card">
+                <h3>Sampel 1</h3>
+                <div class="sample-value" id="sampel1">--</div>
+            </div>
+
+            <div class="sample-card">
+                <h3>Sampel 2</h3>
+                <div class="sample-value" id="sampel2">--</div>
+            </div>
+
+            <div class="sample-card">
+                <h3>Sampel 3</h3>
+                <div class="sample-value" id="sampel3">--</div>
+            </div>
+
+            <div class="sample-card">
+                <h3>Sampel 4</h3>
+                <div class="sample-value" id="sampel4">--</div>
+            </div>
+
+            <div class="sample-card">
+                <h3>Sampel 5</h3>
+                <div class="sample-value" id="sampel5">--</div>
+            </div>
+
+            <div class="sample-card">
+                <h3>Sampel 6</h3>
+                <div class="sample-value" id="sampel6">--</div>
+            </div>
+
+            <div class="sample-card">
+                <h3>Sampel 7</h3>
+                <div class="sample-value" id="sampel7">--</div>
+            </div>
+
+            <div class="sample-card">
+                <h3>Sampel 8</h3>
+                <div class="sample-value" id="sampel8">--</div>
+            </div>
+
+            <div class="sample-card">
+                <h3>Sampel 9</h3>
+                <div class="sample-value" id="sampel9">--</div>
+            </div>
+
+            <div class="sample-card">
+                <h3>Sampel 10</h3>
+                <div class="sample-value" id="sampel10">--</div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= GRAFIK SAMPEL ================= -->
+
+    <div class="chart-container">
+
+        <h2 class="section-title">
+            Grafik Konduktivitas Sampel
+        </h2>
+
+        <div class="chart-box">
+
+            <canvas id="conductivityChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= GRAFIK PARAMETER ================= -->
+
+    <div class="chart-container">
+
+        <h2 class="section-title">
+            Grafik Parameter Utama
+        </h2>
+
+        <div class="chart-box">
+
+            <canvas id="parameterChart"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= EXPORT EXCEL ================= -->
+
+    <div class="export-container">
+
+        <h2 class="section-title">
+            Export Data ke Excel
+        </h2>
+
+        <div class="export-grid">
+
+            <div class="input-group">
+
+                <label for="startDate">
+                    Dari Tanggal
+                </label>
+
+                <input
+                    type="date"
+                    id="startDate"
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label for="startTime">
+                    Dari Jam
+                </label>
+
+                <input
+                    type="time"
+                    id="startTime"
+                    value="00:00"
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label for="endDate">
+                    Sampai Tanggal
+                </label>
+
+                <input
+                    type="date"
+                    id="endDate"
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label for="endTime">
+                    Sampai Jam
+                </label>
+
+                <input
+                    type="time"
+                    id="endTime"
+                    value="23:59"
+                >
+
+            </div>
+
+        </div>
+
+
+        <button
+            id="exportButton"
+            class="export-button"
+            onclick="exportToExcel()"
+        >
+            Export Data ke Excel
+        </button>
+
+
+        <div
+            id="exportInfo"
+            class="export-info"
+        >
+            Pilih tanggal dan waktu,
+            kemudian tekan tombol
+            <b>Export Data ke Excel</b>.
+        </div>
+
+    </div>
+
+
+    <!-- ================= TABLE ================= -->
+
+    <div class="table-container">
+
+        <h2 class="section-title">
+            Data Terbaru
+        </h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Waktu
+                    </th>
+
+                    <th>
+                        Sampel 1
+                    </th>
+
+                    <th>
+                        Sampel 2
+                    </th>
+
+                    <th>
+                        Sampel 3
+                    </th>
+
+                    <th>
+                        Sampel 4
+                    </th>
+
+                    <th>
+                        Sampel 5
+                    </th>
+
+                    <th>
+                        Sampel 6
+                    </th>
+
+                    <th>
+                        Sampel 7
+                    </th>
+
+                    <th>
+                        Sampel 8
+                    </th>
+
+                    <th>
+                        Sampel 9
+                    </th>
+
+                    <th>
+                        Sampel 10
+                    </th>
+
+                    <th>
+                        Tegangan
+                    </th>
+
+                    <th>
+                        Arus
+                    </th>
+
+                    <th>
+                        Suhu
+                    </th>
+
+                    <th>
+                        pH
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="dataTable">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <footer>
+
+        Monitoring Bahan Sampel -
+        ESP32 & Supabase
+
+    </footer>
+
+</div>
+
+
+<script>
+
+    /* =====================================================
+       KONFIGURASI SUPABASE
+       ===================================================== */
+
+    const SUPABASE_URL =
+        "MASUKKAN_SUPABASE_URL_ANDA";
+
+    const SUPABASE_ANON_KEY =
+        "MASUKKAN_SUPABASE_ANON_KEY_ANDA";
+
+
+    const supabaseClient =
+        supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
+
+
+    /* =====================================================
+       NAMA TABEL
+       ===================================================== */
+
+    const TABLE_NAME =
+        "Data_Sampel";
+
+
+    /* =====================================================
+       VARIABEL GRAFIK
+       ===================================================== */
+
+    let conductivityChart;
+
+    let parameterChart;
+
+
+    /* =====================================================
+       FORMAT ANGKA
+       ===================================================== */
+
+    function formatValue(value) {
+
+        if (
+            value === null ||
+            value === undefined ||
+            value === "" ||
+            isNaN(value)
+        ) {
+
+            return "--";
+
+        }
+
+        return Number(value).toFixed(2);
+
+    }
+
+
+    /* =====================================================
+       FORMAT TANGGAL
+       ===================================================== */
+
+    function formatDateTime(value) {
+
+        if (!value) {
+
+            return "--";
+
+        }
+
+        const date =
+            new Date(value);
+
+        return date.toLocaleString(
+            "id-ID",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       STATUS KONEKSI
+       ===================================================== */
+
+    function setConnection(status) {
+
+        const element =
+            document.getElementById(
+                "connectionStatus"
+            );
+
+
+        if (status === true) {
+
+            element.textContent =
+                "ONLINE";
+
+            element.className =
+                "status online";
+
+        }
+
+        else {
+
+            element.textContent =
+                "OFFLINE";
+
+            element.className =
+                "status offline";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       UPDATE DASHBOARD
+       ===================================================== */
+
+    function updateDashboard(data) {
+
+        if (!data) {
+
+            return;
+
+        }
+
+
+        /* PARAMETER UTAMA */
+
+        document.getElementById("tegangan")
+            .textContent =
+            formatValue(data.tegangan);
+
+
+        document.getElementById("arus")
+            .textContent =
+            formatValue(data.arus);
+
+
+        document.getElementById("suhu")
+            .textContent =
+            formatValue(data.suhu);
+
+
+        document.getElementById("ph")
+            .textContent =
+            formatValue(data.ph);
+
+
+        /* SAMPEL 1-10 */
+
+        for (
+            let i = 1;
+            i <= 10;
+            i++
+        ) {
+
+            const element =
+                document.getElementById(
+                    "sampel" + i
+                );
+
+
+            if (element) {
+
+                element.textContent =
+                    formatValue(
+                        data[
+                            "konduktivitas_" + i
+                        ]
+                    );
+
+            }
+
+        }
+
+    }
+
+
+    /* =====================================================
+       MEMBUAT GRAFIK KONDUKTIVITAS
+       ===================================================== */
+
+    function createConductivityChart() {
+
+        const ctx =
+            document
+                .getElementById(
+                    "conductivityChart"
+                )
+                .getContext("2d");
+
+
+        const datasets = [];
+
+
+        for (
+            let i = 1;
+            i <= 10;
+            i++
+        ) {
+
+            datasets.push({
+
+                label:
+                    "Sampel " + i,
+
+                data: [],
+
+                borderWidth: 2,
+
+                tension: 0.3,
+
+                fill: false
+
+            });
+
+        }
+
+
+        conductivityChart =
+            new Chart(
+                ctx,
+                {
+
+                    type: "line",
+
+                    data: {
+
+                        labels: [],
+
+                        datasets:
+                            datasets
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        interaction: {
+
+                            mode: "index",
+
+                            intersect: false
+
+                        },
+
+                        plugins: {
+
+                            legend: {
+
+                                position:
+                                    "bottom"
+
+                            }
+
+                        },
+
+                        scales: {
+
+                            x: {
+
+                                title: {
+
+                                    display: true,
+
+                                    text:
+                                        "Waktu"
+
+                                }
+
+                            },
+
+                            y: {
+
+                                title: {
+
+                                    display: true,
+
+                                    text:
+                                        "Konduktivitas"
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+    }
+
+
+    /* =====================================================
+       MEMBUAT GRAFIK PARAMETER UTAMA
+       ===================================================== */
+
+    function createParameterChart() {
+
+        const ctx =
+            document
+                .getElementById(
+                    "parameterChart"
+                )
+                .getContext("2d");
+
+
+        parameterChart =
+            new Chart(
+                ctx,
+                {
+
+                    type: "line",
+
+                    data: {
+
+                        labels: [],
+
+                        datasets: [
+
+                            {
+
+                                label:
+                                    "Tegangan (V)",
+
+                                data: [],
+
+                                borderWidth: 2,
+
+                                tension: 0.3,
+
+                                fill: false
+
+                            },
+
+                            {
+
+                                label:
+                                    "Arus (A)",
+
+                                data: [],
+
+                                borderWidth: 2,
+
+                                tension: 0.3,
+
+                                fill: false
+
+                            },
+
+                            {
+
+                                label:
+                                    "Suhu (°C)",
+
+                                data: [],
+
+                                borderWidth: 2,
+
+                                tension: 0.3,
+
+                                fill: false
+
+                            },
+
+                            {
+
+                                label:
+                                    "pH",
+
+                                data: [],
+
+                                borderWidth: 2,
+
+                                tension: 0.3,
+
+                                fill: false
+
+                            }
+
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        interaction: {
+
+                            mode: "index",
+
+                            intersect: false
+
+                        },
+
+                        plugins: {
+
+                            legend: {
+
+                                position:
+                                    "bottom"
+
+                            }
+
+                        },
+
+                        scales: {
+
+                            x: {
+
+                                title: {
+
+                                    display: true,
+
+                                    text:
+                                        "Waktu"
+
+                                }
+
+                            },
+
+                            y: {
+
+                                title: {
+
+                                    display: true,
+
+                                    text:
+                                        "Nilai"
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            );
+
+    }
+
+
+    /* =====================================================
+       UPDATE GRAFIK
+       ===================================================== */
+
+    function updateCharts(data) {
+
+        if (!data) {
+
+            return;
+
+        }
+
+
+        const labels =
+            data.map(
+                item =>
+                    formatDateTime(
+                        item.created_at
+                    )
+            );
+
+
+        /* ============================
+           GRAFIK SAMPEL
+           ============================ */
+
+        conductivityChart.data.labels =
+            labels;
+
+
+        for (
+            let i = 1;
+            i <= 10;
+            i++
+        ) {
+
+            conductivityChart
+                .data
+                .datasets[i - 1]
+                .data =
+                data.map(
+                    item =>
+                        item[
+                            "konduktivitas_" + i
+                        ]
+                );
+
+        }
+
+
+        conductivityChart.update();
+
+
+        /* ============================
+           GRAFIK PARAMETER UTAMA
+           ============================ */
+
+        parameterChart.data.labels =
+            labels;
+
+
+        parameterChart
+            .data
+            .datasets[0]
+            .data =
+            data.map(
+                item =>
+                    item.tegangan
+            );
+
+
+        parameterChart
+            .data
+            .datasets[1]
+            .data =
+            data.map(
+                item =>
+                    item.arus
+            );
+
+
+        parameterChart
+            .data
+            .datasets[2]
+            .data =
+            data.map(
+                item =>
+                    item.suhu
+            );
+
+
+        parameterChart
+            .data
+            .datasets[3]
+            .data =
+            data.map(
+                item =>
+                    item.ph
+            );
+
+
+        parameterChart.update();
+
+    }
+
+
+    /* =====================================================
+       UPDATE TABLE
+       ===================================================== */
+
+    function updateTable(data) {
+
+        const table =
+            document.getElementById(
+                "dataTable"
+            );
+
+
+        table.innerHTML = "";
+
+
+        data.forEach(
+            item => {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                let html = "";
+
+
+                html +=
+                    `<td>
+                        ${formatDateTime(
+                            item.created_at
+                        )}
+                    </td>`;
+
+
+                for (
+                    let i = 1;
+                    i <= 10;
+                    i++
+                ) {
+
+                    html +=
+                        `<td>
+                            ${formatValue(
+                                item[
+                                    "konduktivitas_" + i
+                                ]
+                            )}
+                        </td>`;
+
+                }
+
+
+                html +=
+                    `<td>
+                        ${formatValue(
+                            item.tegangan
+                        )}
+                    </td>`;
+
+
+                html +=
+                    `<td>
+                        ${formatValue(
+                            item.arus
+                        )}
+                    </td>`;
+
+
+                html +=
+                    `<td>
+                        ${formatValue(
+                            item.suhu
+                        )}
+                    </td>`;
+
+
+                html +=
+                    `<td>
+                        ${formatValue(
+                            item.ph
+                        )}
+                    </td>`;
+
+
+                row.innerHTML =
+                    html;
+
+
+                table.appendChild(
+                    row
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       AMBIL DATA TERBARU
+       ===================================================== */
+
+    async function getLatestData() {
+
+        try {
+
+            const {
+                data,
+                error
+            } = await supabaseClient
+
+                .from(TABLE_NAME)
+
+                .select("*")
+
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                )
+
+                .limit(1);
+
+
+            if (error) {
+
+                console.error(
+                    error
+                );
+
+                setConnection(false);
+
+                return;
+
+            }
+
+
+            if (
+                data &&
+                data.length > 0
+            ) {
+
+                updateDashboard(
+                    data[0]
+                );
+
+                setConnection(true);
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.error(
+                error
+            );
+
+            setConnection(false);
+
+        }
+
+    }
+
+
+    /* =====================================================
+       AMBIL HISTORY DATA
+       ===================================================== */
+
+    async function getHistory() {
+
+        try {
+
+            const {
+                data,
+                error
+            } = await supabaseClient
+
+                .from(TABLE_NAME)
+
+                .select("*")
+
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                )
+
+                .limit(20);
+
+
+            if (error) {
+
+                console.error(
+                    error
+                );
+
+                return;
+
+            }
+
+
+            if (data) {
+
+                /* Karena data diambil
+                   dari terbaru ke terlama,
+                   dibalik agar grafik
+                   berjalan dari kiri ke kanan */
+
+                const history =
+                    [...data].reverse();
+
+
+                updateCharts(
+                    history
+                );
+
+
+                updateTable(
+                    data
+                );
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.error(
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       REALTIME SUPABASE
+       ===================================================== */
+
+    function startRealtime() {
+
+        supabaseClient
+
+            .channel(
+                "monitoring-sampel"
+            )
+
+            .on(
+
+                "postgres_changes",
+
+                {
+
+                    event: "INSERT",
+
+                    schema: "public",
+
+                    table: TABLE_NAME
+
+                },
+
+                payload => {
+
+                    console.log(
+                        "Data baru:",
+                        payload.new
+                    );
+
+
+                    updateDashboard(
+                        payload.new
+                    );
+
+
+                    setConnection(
+                        true
+                    );
+
+
+                    getHistory();
+
+                }
+
+            )
+
+            .subscribe(
+                status => {
+
+                    console.log(
+                        "Realtime:",
+                        status
+                    );
+
+
+                    if (
+                        status ===
+                        "SUBSCRIBED"
+                    ) {
+
+                        setConnection(
+                            true
+                        );
+
+                    }
+
+                }
+            );
+
+    }
+
+
+    /* =====================================================
+       EXPORT EXCEL
+       ===================================================== */
+
+    async function exportToExcel() {
+
+        const startDate =
+            document
+                .getElementById(
+                    "startDate"
+                )
+                .value;
+
+
+        const startTime =
+            document
+                .getElementById(
+                    "startTime"
+                )
+                .value;
+
+
+        const endDate =
+            document
+                .getElementById(
+                    "endDate"
+                )
+                .value;
+
+
+        const endTime =
+            document
+                .getElementById(
+                    "endTime"
+                )
+                .value;
+
+
+        const info =
+            document
+                .getElementById(
+                    "exportInfo"
+                );
+
+
+        /* =========================
+           VALIDASI
+           ========================= */
+
+        if (
+            !startDate ||
+            !startTime ||
+            !endDate ||
+            !endTime
+        ) {
+
+            alert(
+                "Tanggal dan jam mulai serta selesai harus diisi."
+            );
+
+            return;
+
+        }
+
+
+        const startDateTime =
+            new Date(
+                `${startDate}T${startTime}:00`
+            );
+
+
+        const endDateTime =
+            new Date(
+                `${endDate}T${endTime}:59`
+            );
+
+
+        if (
+            startDateTime >=
+            endDateTime
+        ) {
+
+            alert(
+                "Waktu mulai harus lebih kecil dari waktu selesai."
+            );
+
+            return;
+
+        }
+
+
+        /* =========================
+           UBAH KE ISO
+           ========================= */
+
+        const startISO =
+            startDateTime.toISOString();
+
+
+        const endISO =
+            endDateTime.toISOString();
+
+
+        try {
+
+            info.textContent =
+                "Sedang mengambil data...";
+
+
+            /* =========================
+               AMBIL DATA SUPABASE
+               ========================= */
+
+            const {
+                data,
+                error
+            } = await supabaseClient
+
+                .from(TABLE_NAME)
+
+                .select("*")
+
+                .gte(
+                    "created_at",
+                    startISO
+                )
+
+                .lte(
+                    "created_at",
+                    endISO
+                )
+
+                .order(
+                    "created_at",
+                    {
+                        ascending: true
+                    }
+                );
+
+
+            if (error) {
+
+                console.error(
+                    error
+                );
+
+                alert(
+                    "Gagal mengambil data dari Supabase."
+                );
+
+                info.textContent =
+                    "Export gagal.";
+
+                return;
+
+            }
+
+
+            if (
+                !data ||
+                data.length === 0
+            ) {
+
+                alert(
+                    "Tidak ada data pada rentang waktu yang dipilih."
+                );
+
+                info.textContent =
+                    "Tidak ada data pada periode tersebut.";
+
+                return;
+
+            }
+
+
+            /* =========================
+               UBAH DATA KE FORMAT EXCEL
+               ========================= */
+
+            const excelData =
+                data.map(
+                    item => ({
+
+                        "Waktu":
+                            formatDateTime(
+                                item.created_at
+                            ),
+
+                        "Konduktivitas Sampel 1":
+                            item.konduktivitas_1,
+
+                        "Konduktivitas Sampel 2":
+                            item.konduktivitas_2,
+
+                        "Konduktivitas Sampel 3":
+                            item.konduktivitas_3,
+
+                        "Konduktivitas Sampel 4":
+                            item.konduktivitas_4,
+
+                        "Konduktivitas Sampel 5":
+                            item.konduktivitas_5,
+
+                        "Konduktivitas Sampel 6":
+                            item.konduktivitas_6,
+
+                        "Konduktivitas Sampel 7":
+                            item.konduktivitas_7,
+
+                        "Konduktivitas Sampel 8":
+                            item.konduktivitas_8,
+
+                        "Konduktivitas Sampel 9":
+                            item.konduktivitas_9,
+
+                        "Konduktivitas Sampel 10":
+                            item.konduktivitas_10,
+
+                        "Tegangan (V)":
+                            item.tegangan,
+
+                        "Arus (A)":
+                            item.arus,
+
+                        "Suhu (°C)":
+                            item.suhu,
+
+                        "pH":
+                            item.ph
+
+                    })
+                );
+
+
+            /* =========================
+               BUAT WORKSHEET
+               ========================= */
+
+            const worksheet =
+                XLSX.utils.json_to_sheet(
+                    excelData
+                );
+
+
+            /* =========================
+               LEBAR KOLOM
+               ========================= */
+
+            worksheet["!cols"] = [
+
+                {
+                    wch: 22
+                },
+
+                {
+                    wch: 20
+                },
+
+                {
+                    wch: 20
+                },
+
+                {
+                    wch: 20
+                },
+
+                {
+                    wch: 20
+                },
+
+                {
+                    wch: 20
+                },
+
+                {
+                    wch: 20
+                },
+
+                {
+                    wch: 20
+                },
+
+                {
+                    wch: 20
+                },
+
+                {
+                    wch: 20
+                },
+
+                {
+                    wch: 20
+                },
+
+                {
+                    wch: 15
+                },
+
+                {
+                    wch: 15
+                },
+
+                {
+                    wch: 15
+                },
+
+                {
+                    wch: 12
+                }
+
+            ];
+
+
+            /* =========================
+               BUAT WORKBOOK
+               ========================= */
+
+            const workbook =
+                XLSX.utils.book_new();
+
+
+            XLSX.utils.book_append_sheet(
+                workbook,
+                worksheet,
+                "Data Monitoring"
+            );
+
+
+            /* =========================
+               NAMA FILE
+               ========================= */
+
+            const fileName =
+                `Data_Monitoring_${startDate}_${endDate}.xlsx`;
+
+
+            /* =========================
+               DOWNLOAD
+               ========================= */
+
+            XLSX.writeFile(
+                workbook,
+                fileName
+            );
+
+
+            /* =========================
+               INFORMASI EXPORT
+               ========================= */
+
+            info.innerHTML =
+                `Berhasil export <b>${data.length}</b> data.
+                Periode:
+                <b>${startDate} ${startTime}</b>
+                sampai
+                <b>${endDate} ${endTime}</b>.`;
+
+
+        }
+
+        catch (error) {
+
+            console.error(
+                error
+            );
+
+            alert(
+                "Terjadi kesalahan saat export data."
+            );
+
+            info.textContent =
+                "Export gagal.";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       SET TANGGAL DEFAULT
+       ===================================================== */
+
+    function setDefaultDate() {
+
+        const now =
+            new Date();
+
+
+        const year =
+            now.getFullYear();
+
+
+        const month =
+            String(
+                now.getMonth() + 1
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const day =
+            String(
+                now.getDate()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const today =
+            `${year}-${month}-${day}`;
+
+
+        document
+            .getElementById(
+                "startDate"
+            )
+            .value =
+            today;
+
+
+        document
+            .getElementById(
+                "endDate"
+            )
+            .value =
+            today;
+
+    }
+
+
+    /* =====================================================
+       INISIALISASI
+       ===================================================== */
+
+    async function init() {
+
+        console.log(
+            "Memulai sistem monitoring..."
+        );
+
+
+        createConductivityChart();
+
+
+        createParameterChart();
+
+
+        setDefaultDate();
+
+
+        await getLatestData();
+
+
+        await getHistory();
+
+
+        startRealtime();
+
+    }
+
+
+    /* =====================================================
+       JALANKAN PROGRAM
+       ===================================================== */
+
+    init();
+
+</script>
+
+</body>
+</html>
