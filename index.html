@@ -1,21 +1,42 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Monitoring Bahan Sampel</title>
 
-    <!-- SUPABASE -->
+
+    <!-- =====================================================
+         SUPABASE
+         ===================================================== -->
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- CHART.JS -->
+
+    <!-- =====================================================
+         CHART.JS
+         ===================================================== -->
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- SHEETJS / EXCEL -->
+
+    <!-- =====================================================
+         SHEETJS UNTUK EXPORT EXCEL
+         ===================================================== -->
+
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
+
     <style>
+
+        /* =====================================================
+           RESET
+           ===================================================== */
 
         * {
             box-sizing: border-box;
@@ -23,378 +44,924 @@
             padding: 0;
         }
 
+
+        /* =====================================================
+           BODY
+           ===================================================== */
+
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f4f6f9;
-            color: #222;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                #f4f6f9;
+
+            color:
+                #222;
+
         }
+
+
+        /* =====================================================
+           CONTAINER
+           ===================================================== */
 
         .container {
-            width: 95%;
-            max-width: 1400px;
-            margin: 30px auto;
+
+            width:
+                95%;
+
+            max-width:
+                1400px;
+
+            margin:
+                30px auto;
+
         }
 
-        /* ================= HEADER ================= */
+
+        /* =====================================================
+           HEADER
+           ===================================================== */
 
         header {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+
+            background:
+                white;
+
+            padding:
+                25px;
+
+            border-radius:
+                15px;
+
+            margin-bottom:
+                25px;
+
+            box-shadow:
+                0 3px 10px rgba(0,0,0,0.08);
+
         }
+
 
         header h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
+
+            font-size:
+                28px;
+
+            margin-bottom:
+                8px;
+
         }
+
 
         header p {
-            color: #666;
-            font-size: 15px;
+
+            color:
+                #666;
+
+            font-size:
+                15px;
+
         }
+
+
+        /* =====================================================
+           STATUS KONEKSI
+           ===================================================== */
 
         .status {
-            margin-top: 15px;
-            display: inline-block;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
+
+            margin-top:
+                15px;
+
+            display:
+                inline-block;
+
+            padding:
+                8px 15px;
+
+            border-radius:
+                20px;
+
+            font-size:
+                14px;
+
+            font-weight:
+                bold;
+
         }
+
 
         .online {
-            background: #d4edda;
-            color: #155724;
+
+            background:
+                #d4edda;
+
+            color:
+                #155724;
+
         }
+
 
         .offline {
-            background: #f8d7da;
-            color: #721c24;
+
+            background:
+                #f8d7da;
+
+            color:
+                #721c24;
+
         }
 
-        /* ================= SECTION ================= */
+
+        /* =====================================================
+           JUDUL SECTION
+           ===================================================== */
 
         .section-title {
-            font-size: 21px;
-            margin-bottom: 18px;
+
+            font-size:
+                21px;
+
+            margin-bottom:
+                18px;
+
         }
 
-        /* ================= MAIN SENSOR ================= */
+
+        /* =====================================================
+           PARAMETER UTAMA
+           ===================================================== */
 
         .sensor-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            margin-bottom: 30px;
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap:
+                18px;
+
+            margin-bottom:
+                30px;
+
         }
+
+
+        /* =====================================================
+           SENSOR CARD
+           ===================================================== */
 
         .sensor-card {
-            background: white;
-            padding: 22px;
-            border-radius: 15px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            text-align: center;
+
+            background:
+                white;
+
+            padding:
+                22px;
+
+            border-radius:
+                15px;
+
+            box-shadow:
+                0 3px 10px rgba(0,0,0,0.08);
+
+            text-align:
+                center;
+
+            transition:
+                transform 0.2s;
+
         }
+
+
+        .sensor-card:hover {
+
+            transform:
+                translateY(-3px);
+
+        }
+
+
+        /* =====================================================
+           IKON PARAMETER UTAMA
+           ===================================================== */
+
+        .sensor-icon {
+
+            font-size:
+                42px;
+
+            margin-bottom:
+                10px;
+
+        }
+
 
         .sensor-card h3 {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 15px;
+
+            font-size:
+                16px;
+
+            color:
+                #666;
+
+            margin-bottom:
+                15px;
+
         }
+
 
         .sensor-value {
-            font-size: 32px;
-            font-weight: bold;
+
+            font-size:
+                32px;
+
+            font-weight:
+                bold;
+
         }
 
-        /* ================= SAMPLE ================= */
+
+        /* =====================================================
+           BAGIAN SAMPEL
+           ===================================================== */
 
         .sample-section {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+
+            background:
+                white;
+
+            padding:
+                25px;
+
+            border-radius:
+                15px;
+
+            margin-bottom:
+                30px;
+
+            box-shadow:
+                0 3px 10px rgba(0,0,0,0.08);
+
         }
+
+
+        /* =====================================================
+           JUDUL SAMPEL
+           ===================================================== */
+
+        .sample-title {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                10px;
+
+            margin-bottom:
+                18px;
+
+        }
+
+
+        .sample-title-icon {
+
+            font-size:
+                30px;
+
+        }
+
+
+        /* =====================================================
+           GRID SAMPEL
+           ===================================================== */
 
         .sample-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 15px;
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(5, 1fr);
+
+            gap:
+                15px;
+
         }
+
+
+        /* =====================================================
+           CARD SAMPEL
+           ===================================================== */
 
         .sample-card {
-            background: #f8f9fa;
-            border: 1px solid #e0e0e0;
-            padding: 18px;
-            border-radius: 12px;
-            text-align: center;
+
+            background:
+                #f8f9fa;
+
+            border:
+                1px solid #e0e0e0;
+
+            padding:
+                18px;
+
+            border-radius:
+                12px;
+
+            text-align:
+                center;
+
+            transition:
+                transform 0.2s;
+
         }
+
+
+        .sample-card:hover {
+
+            transform:
+                translateY(-3px);
+
+        }
+
+
+        /* =====================================================
+           IKON SAMPEL
+           ===================================================== */
+
+        .sample-icon {
+
+            font-size:
+                28px;
+
+            margin-bottom:
+                8px;
+
+        }
+
 
         .sample-card h3 {
-            font-size: 15px;
-            color: #555;
-            margin-bottom: 12px;
+
+            font-size:
+                15px;
+
+            color:
+                #555;
+
+            margin-bottom:
+                12px;
+
         }
+
 
         .sample-value {
-            font-size: 25px;
-            font-weight: bold;
+
+            font-size:
+                25px;
+
+            font-weight:
+                bold;
+
         }
 
-        /* ================= CHART ================= */
+
+        /* =====================================================
+           CHART
+           ===================================================== */
 
         .chart-container {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+
+            background:
+                white;
+
+            padding:
+                25px;
+
+            border-radius:
+                15px;
+
+            margin-bottom:
+                30px;
+
+            box-shadow:
+                0 3px 10px rgba(0,0,0,0.08);
+
         }
+
 
         .chart-box {
-            position: relative;
-            height: 400px;
+
+            position:
+                relative;
+
+            height:
+                400px;
+
         }
 
-        /* ================= TABLE ================= */
+
+        /* =====================================================
+           EXPORT
+           ===================================================== */
+
+        .export-container {
+
+            background:
+                white;
+
+            padding:
+                25px;
+
+            border-radius:
+                15px;
+
+            margin-bottom:
+                30px;
+
+            box-shadow:
+                0 3px 10px rgba(0,0,0,0.08);
+
+        }
+
+
+        .export-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap:
+                15px;
+
+        }
+
+
+        .input-group {
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+        }
+
+
+        .input-group label {
+
+            font-size:
+                14px;
+
+            font-weight:
+                bold;
+
+            margin-bottom:
+                7px;
+
+        }
+
+
+        .input-group input {
+
+            padding:
+                11px;
+
+            border:
+                1px solid #ccc;
+
+            border-radius:
+                8px;
+
+            font-size:
+                14px;
+
+        }
+
+
+        /* =====================================================
+           BUTTON EXPORT
+           ===================================================== */
+
+        .export-button {
+
+            margin-top:
+                15px;
+
+            padding:
+                12px 22px;
+
+            border:
+                none;
+
+            border-radius:
+                8px;
+
+            background:
+                #198754;
+
+            color:
+                white;
+
+            font-size:
+                15px;
+
+            font-weight:
+                bold;
+
+            cursor:
+                pointer;
+
+        }
+
+
+        .export-button:hover {
+
+            opacity:
+                0.9;
+
+        }
+
+
+        /* =====================================================
+           INFORMASI EXPORT
+           ===================================================== */
+
+        .export-info {
+
+            margin-top:
+                15px;
+
+            padding:
+                12px;
+
+            background:
+                #f1f3f5;
+
+            border-radius:
+                8px;
+
+            font-size:
+                14px;
+
+        }
+
+
+        /* =====================================================
+           TABLE
+           ===================================================== */
 
         .table-container {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
 
-            overflow-x: auto;
+            background:
+                white;
+
+            padding:
+                25px;
+
+            border-radius:
+                15px;
+
+            margin-bottom:
+                30px;
+
+            box-shadow:
+                0 3px 10px rgba(0,0,0,0.08);
+
+            overflow-x:
+                auto;
+
         }
+
 
         table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1200px;
+
+            width:
+                100%;
+
+            border-collapse:
+                collapse;
+
+            min-width:
+                1200px;
+
         }
+
 
         th,
         td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
-            font-size: 13px;
+
+            padding:
+                10px;
+
+            border:
+                1px solid #ddd;
+
+            text-align:
+                center;
+
+            font-size:
+                13px;
+
         }
+
 
         th {
-            background: #f1f3f5;
+
+            background:
+                #f1f3f5;
+
         }
 
-        /* ================= EXPORT ================= */
 
-        .export-container {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-        }
-
-        .export-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .input-group label {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 7px;
-        }
-
-        .input-group input {
-            padding: 11px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .export-button {
-            margin-top: 15px;
-            padding: 12px 22px;
-            border: none;
-            border-radius: 8px;
-            background: #198754;
-            color: white;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .export-button:hover {
-            opacity: 0.9;
-        }
-
-        .export-info {
-            margin-top: 15px;
-            padding: 12px;
-            background: #f1f3f5;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        /* ================= FOOTER ================= */
+        /* =====================================================
+           FOOTER
+           ===================================================== */
 
         footer {
-            text-align: center;
-            padding: 20px;
-            color: #777;
-            font-size: 13px;
+
+            text-align:
+                center;
+
+            padding:
+                20px;
+
+            color:
+                #777;
+
+            font-size:
+                13px;
+
         }
 
-        /* ================= RESPONSIVE ================= */
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
 
         @media (max-width: 1100px) {
 
             .sensor-grid {
-                grid-template-columns: repeat(2, 1fr);
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+
             }
+
 
             .sample-grid {
-                grid-template-columns: repeat(3, 1fr);
+
+                grid-template-columns:
+                    repeat(3, 1fr);
+
             }
 
+
             .export-grid {
-                grid-template-columns: repeat(2, 1fr);
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+
             }
+
         }
+
 
         @media (max-width: 650px) {
 
             .sensor-grid {
-                grid-template-columns: 1fr;
+
+                grid-template-columns:
+                    1fr;
+
             }
+
 
             .sample-grid {
-                grid-template-columns: repeat(2, 1fr);
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+
             }
+
 
             .export-grid {
-                grid-template-columns: 1fr;
+
+                grid-template-columns:
+                    1fr;
+
             }
+
 
             header h1 {
-                font-size: 22px;
+
+                font-size:
+                    22px;
+
             }
 
+
             .sensor-value {
-                font-size: 27px;
+
+                font-size:
+                    27px;
+
             }
+
+
+            .sensor-icon {
+
+                font-size:
+                    36px;
+
+            }
+
         }
 
     </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-    <!-- ================= HEADER ================= -->
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
 
     <header>
 
-        <h1>Monitoring Bahan Sampel</h1>
+        <h1>
+            🔬 Monitoring Bahan Sampel
+        </h1>
 
         <p>
-            Monitoring data konduktivitas sampel dan parameter lingkungan
-            secara real-time
+            Monitoring konduktivitas bahan sampel
+            dan parameter pengukuran secara real-time
         </p>
 
-        <div id="connectionStatus" class="status offline">
+
+        <div
+            id="connectionStatus"
+            class="status offline">
+
             OFFLINE
+
         </div>
 
     </header>
 
 
-    <!-- ================= PARAMETER UTAMA ================= -->
+
+    <!-- =====================================================
+         PARAMETER UTAMA
+         ===================================================== -->
 
     <h2 class="section-title">
+
         Parameter Utama
+
     </h2>
+
 
     <div class="sensor-grid">
 
-        <!-- TEGANGAN -->
+
+        <!-- =================================================
+             TEGANGAN
+             ================================================= -->
 
         <div class="sensor-card">
 
+            <div class="sensor-icon">
+
+                ⚡
+
+            </div>
+
             <h3>
+
                 Tegangan
+
             </h3>
 
             <div class="sensor-value">
+
                 <span id="tegangan">
                     --
                 </span>
+
                 V
+
             </div>
 
         </div>
 
 
-        <!-- ARUS -->
+
+        <!-- =================================================
+             ARUS
+             ================================================= -->
 
         <div class="sensor-card">
 
+            <div class="sensor-icon">
+
+                🔌
+
+            </div>
+
             <h3>
+
                 Arus
+
             </h3>
 
             <div class="sensor-value">
+
                 <span id="arus">
                     --
                 </span>
+
                 A
+
             </div>
 
         </div>
 
 
-        <!-- SUHU -->
+
+        <!-- =================================================
+             SUHU
+             ================================================= -->
 
         <div class="sensor-card">
 
+            <div class="sensor-icon">
+
+                🌡️
+
+            </div>
+
             <h3>
+
                 Suhu
+
             </h3>
 
             <div class="sensor-value">
+
                 <span id="suhu">
                     --
                 </span>
+
                 °C
+
             </div>
 
         </div>
 
 
-        <!-- PH -->
+
+        <!-- =================================================
+             PH
+             ================================================= -->
 
         <div class="sensor-card">
 
+            <div class="sensor-icon">
+
+                🧪
+
+            </div>
+
             <h3>
+
                 pH
+
             </h3>
 
             <div class="sensor-value">
+
                 <span id="ph">
                     --
                 </span>
+
             </div>
 
         </div>
@@ -402,294 +969,585 @@
     </div>
 
 
-    <!-- ================= SAMPEL ================= -->
+
+    <!-- =====================================================
+         KONDUKTIVITAS SAMPEL
+         ===================================================== -->
 
     <div class="sample-section">
 
-        <h2 class="section-title">
-            Konduktivitas Bahan Sampel
-        </h2>
+
+        <div class="sample-title">
+
+            <div class="sample-title-icon">
+
+                📊
+
+            </div>
+
+            <h2 class="section-title"
+                style="margin-bottom: 0;">
+
+                Konduktivitas Bahan Sampel
+
+            </h2>
+
+        </div>
+
+
 
         <div class="sample-grid">
 
-            <div class="sample-card">
-                <h3>Sampel 1</h3>
-                <div class="sample-value" id="sampel1">--</div>
-            </div>
+
+            <!-- SAMPEL 1 -->
 
             <div class="sample-card">
-                <h3>Sampel 2</h3>
-                <div class="sample-value" id="sampel2">--</div>
+
+                <div class="sample-icon">
+
+                    🧪
+
+                </div>
+
+                <h3>
+                    Sampel 1
+                </h3>
+
+                <div
+                    class="sample-value"
+                    id="sampel1">
+
+                    --
+
+                </div>
+
             </div>
 
-            <div class="sample-card">
-                <h3>Sampel 3</h3>
-                <div class="sample-value" id="sampel3">--</div>
-            </div>
+
+
+            <!-- SAMPEL 2 -->
 
             <div class="sample-card">
-                <h3>Sampel 4</h3>
-                <div class="sample-value" id="sampel4">--</div>
+
+                <div class="sample-icon">
+
+                    🧪
+
+                </div>
+
+                <h3>
+                    Sampel 2
+                </h3>
+
+                <div
+                    class="sample-value"
+                    id="sampel2">
+
+                    --
+
+                </div>
+
             </div>
 
-            <div class="sample-card">
-                <h3>Sampel 5</h3>
-                <div class="sample-value" id="sampel5">--</div>
-            </div>
+
+
+            <!-- SAMPEL 3 -->
 
             <div class="sample-card">
-                <h3>Sampel 6</h3>
-                <div class="sample-value" id="sampel6">--</div>
+
+                <div class="sample-icon">
+
+                    🧪
+
+                </div>
+
+                <h3>
+                    Sampel 3
+                </h3>
+
+                <div
+                    class="sample-value"
+                    id="sampel3">
+
+                    --
+
+                </div>
+
             </div>
 
-            <div class="sample-card">
-                <h3>Sampel 7</h3>
-                <div class="sample-value" id="sampel7">--</div>
-            </div>
+
+
+            <!-- SAMPEL 4 -->
 
             <div class="sample-card">
-                <h3>Sampel 8</h3>
-                <div class="sample-value" id="sampel8">--</div>
+
+                <div class="sample-icon">
+
+                    🧪
+
+                </div>
+
+                <h3>
+                    Sampel 4
+                </h3>
+
+                <div
+                    class="sample-value"
+                    id="sampel4">
+
+                    --
+
+                </div>
+
             </div>
 
-            <div class="sample-card">
-                <h3>Sampel 9</h3>
-                <div class="sample-value" id="sampel9">--</div>
-            </div>
+
+
+            <!-- SAMPEL 5 -->
 
             <div class="sample-card">
-                <h3>Sampel 10</h3>
-                <div class="sample-value" id="sampel10">--</div>
+
+                <div class="sample-icon">
+
+                    🧪
+
+                </div>
+
+                <h3>
+                    Sampel 5
+                </h3>
+
+                <div
+                    class="sample-value"
+                    id="sampel5">
+
+                    --
+
+                </div>
+
             </div>
+
+
+
+            <!-- SAMPEL 6 -->
+
+            <div class="sample-card">
+
+                <div class="sample-icon">
+
+                    🧪
+
+                </div>
+
+                <h3>
+                    Sampel 6
+                </h3>
+
+                <div
+                    class="sample-value"
+                    id="sampel6">
+
+                    --
+
+                </div>
+
+            </div>
+
+
+
+            <!-- SAMPEL 7 -->
+
+            <div class="sample-card">
+
+                <div class="sample-icon">
+
+                    🧪
+
+                </div>
+
+                <h3>
+                    Sampel 7
+                </h3>
+
+                <div
+                    class="sample-value"
+                    id="sampel7">
+
+                    --
+
+                </div>
+
+            </div>
+
+
+
+            <!-- SAMPEL 8 -->
+
+            <div class="sample-card">
+
+                <div class="sample-icon">
+
+                    🧪
+
+                </div>
+
+                <h3>
+                    Sampel 8
+                </h3>
+
+                <div
+                    class="sample-value"
+                    id="sampel8">
+
+                    --
+
+                </div>
+
+            </div>
+
+
+
+            <!-- SAMPEL 9 -->
+
+            <div class="sample-card">
+
+                <div class="sample-icon">
+
+                    🧪
+
+                </div>
+
+                <h3>
+                    Sampel 9
+                </h3>
+
+                <div
+                    class="sample-value"
+                    id="sampel9">
+
+                    --
+
+                </div>
+
+            </div>
+
+
+
+            <!-- SAMPEL 10 -->
+
+            <div class="sample-card">
+
+                <div class="sample-icon">
+
+                    🧪
+
+                </div>
+
+                <h3>
+                    Sampel 10
+                </h3>
+
+                <div
+                    class="sample-value"
+                    id="sampel10">
+
+                    --
+
+                </div>
+
+            </div>
+
 
         </div>
 
     </div>
 
 
-    <!-- ================= GRAFIK SAMPEL ================= -->
+
+    <!-- =====================================================
+         GRAFIK KONDUKTIVITAS
+         ===================================================== -->
 
     <div class="chart-container">
 
         <h2 class="section-title">
-            Grafik Konduktivitas Sampel
+
+            📈 Grafik Konduktivitas Sampel
+
         </h2>
+
 
         <div class="chart-box">
 
-            <canvas id="conductivityChart"></canvas>
+            <canvas
+                id="conductivityChart">
+            </canvas>
 
         </div>
 
     </div>
 
 
-    <!-- ================= GRAFIK PARAMETER ================= -->
+
+    <!-- =====================================================
+         GRAFIK PARAMETER
+         ===================================================== -->
 
     <div class="chart-container">
 
         <h2 class="section-title">
-            Grafik Parameter Utama
+
+            📉 Grafik Parameter Utama
+
         </h2>
+
 
         <div class="chart-box">
 
-            <canvas id="parameterChart"></canvas>
+            <canvas
+                id="parameterChart">
+            </canvas>
 
         </div>
 
     </div>
 
 
-    <!-- ================= EXPORT EXCEL ================= -->
+
+    <!-- =====================================================
+         EXPORT EXCEL
+         ===================================================== -->
 
     <div class="export-container">
 
+
         <h2 class="section-title">
-            Export Data ke Excel
+
+            📥 Export Data ke Excel
+
         </h2>
 
+
         <div class="export-grid">
+
+
+            <!-- TANGGAL MULAI -->
 
             <div class="input-group">
 
                 <label for="startDate">
-                    Dari Tanggal
+
+                    📅 Dari Tanggal
+
                 </label>
 
                 <input
                     type="date"
-                    id="startDate"
-                >
+                    id="startDate">
 
             </div>
 
 
+
+            <!-- JAM MULAI -->
+
             <div class="input-group">
 
                 <label for="startTime">
-                    Dari Jam
+
+                    🕐 Dari Jam
+
                 </label>
 
                 <input
                     type="time"
                     id="startTime"
-                    value="00:00"
-                >
+                    value="00:00">
 
             </div>
 
+
+
+            <!-- TANGGAL SELESAI -->
 
             <div class="input-group">
 
                 <label for="endDate">
-                    Sampai Tanggal
+
+                    📅 Sampai Tanggal
+
                 </label>
 
                 <input
                     type="date"
-                    id="endDate"
-                >
+                    id="endDate">
 
             </div>
 
 
+
+            <!-- JAM SELESAI -->
+
             <div class="input-group">
 
                 <label for="endTime">
-                    Sampai Jam
+
+                    🕐 Sampai Jam
+
                 </label>
 
                 <input
                     type="time"
                     id="endTime"
-                    value="23:59"
-                >
+                    value="23:59">
 
             </div>
 
+
         </div>
+
 
 
         <button
             id="exportButton"
             class="export-button"
-            onclick="exportToExcel()"
-        >
-            Export Data ke Excel
+            onclick="exportToExcel()">
+
+            📥 Export Data ke Excel
+
         </button>
 
 
         <div
             id="exportInfo"
-            class="export-info"
-        >
+            class="export-info">
+
             Pilih tanggal dan waktu,
             kemudian tekan tombol
             <b>Export Data ke Excel</b>.
+
         </div>
 
     </div>
 
 
-    <!-- ================= TABLE ================= -->
+
+    <!-- =====================================================
+         TABEL DATA
+         ===================================================== -->
 
     <div class="table-container">
 
+
         <h2 class="section-title">
-            Data Terbaru
+
+            📋 Data Terbaru
+
         </h2>
 
+
         <table>
+
 
             <thead>
 
                 <tr>
 
                     <th>
-                        Waktu
+                        🕐 Waktu
                     </th>
 
                     <th>
-                        Sampel 1
+                        🧪 Sampel 1
                     </th>
 
                     <th>
-                        Sampel 2
+                        🧪 Sampel 2
                     </th>
 
                     <th>
-                        Sampel 3
+                        🧪 Sampel 3
                     </th>
 
                     <th>
-                        Sampel 4
+                        🧪 Sampel 4
                     </th>
 
                     <th>
-                        Sampel 5
+                        🧪 Sampel 5
                     </th>
 
                     <th>
-                        Sampel 6
+                        🧪 Sampel 6
                     </th>
 
                     <th>
-                        Sampel 7
+                        🧪 Sampel 7
                     </th>
 
                     <th>
-                        Sampel 8
+                        🧪 Sampel 8
                     </th>
 
                     <th>
-                        Sampel 9
+                        🧪 Sampel 9
                     </th>
 
                     <th>
-                        Sampel 10
+                        🧪 Sampel 10
                     </th>
 
                     <th>
-                        Tegangan
+                        ⚡ Tegangan
                     </th>
 
                     <th>
-                        Arus
+                        🔌 Arus
                     </th>
 
                     <th>
-                        Suhu
+                        🌡️ Suhu
                     </th>
 
                     <th>
-                        pH
+                        🧪 pH
                     </th>
 
                 </tr>
 
             </thead>
 
+
             <tbody id="dataTable">
 
             </tbody>
+
 
         </table>
 
     </div>
 
 
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
     <footer>
 
-        Monitoring Bahan Sampel -
+        🔬 Monitoring Bahan Sampel
+        -
         ESP32 & Supabase
 
     </footer>
 
+
 </div>
 
 
+
 <script>
+
 
     /* =====================================================
        KONFIGURASI SUPABASE
@@ -697,6 +1555,7 @@
 
     const SUPABASE_URL =
         "MASUKKAN_SUPABASE_URL_ANDA";
+
 
     const SUPABASE_ANON_KEY =
         "MASUKKAN_SUPABASE_ANON_KEY_ANDA";
@@ -709,16 +1568,18 @@
         );
 
 
+
     /* =====================================================
-       NAMA TABEL
+       NAMA TABEL SUPABASE
        ===================================================== */
 
     const TABLE_NAME =
         "Data_Sampel";
 
 
+
     /* =====================================================
-       VARIABEL GRAFIK
+       VARIABEL CHART
        ===================================================== */
 
     let conductivityChart;
@@ -726,8 +1587,9 @@
     let parameterChart;
 
 
+
     /* =====================================================
-       FORMAT ANGKA
+       FORMAT NILAI
        ===================================================== */
 
     function formatValue(value) {
@@ -743,13 +1605,16 @@
 
         }
 
-        return Number(value).toFixed(2);
+
+        return Number(value)
+            .toFixed(2);
 
     }
 
 
+
     /* =====================================================
-       FORMAT TANGGAL
+       FORMAT TANGGAL DAN WAKTU
        ===================================================== */
 
     function formatDateTime(value) {
@@ -760,22 +1625,41 @@
 
         }
 
+
         const date =
             new Date(value);
 
+
         return date.toLocaleString(
+
             "id-ID",
+
             {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
+
+                day:
+                    "2-digit",
+
+                month:
+                    "2-digit",
+
+                year:
+                    "numeric",
+
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit",
+
+                second:
+                    "2-digit"
+
             }
+
         );
 
     }
+
 
 
     /* =====================================================
@@ -795,6 +1679,7 @@
             element.textContent =
                 "ONLINE";
 
+
             element.className =
                 "status online";
 
@@ -805,12 +1690,14 @@
             element.textContent =
                 "OFFLINE";
 
+
             element.className =
                 "status offline";
 
         }
 
     }
+
 
 
     /* =====================================================
@@ -826,29 +1713,61 @@
         }
 
 
-        /* PARAMETER UTAMA */
+        /* ================================================
+           TEGANGAN
+           ================================================ */
 
-        document.getElementById("tegangan")
+        document
+            .getElementById("tegangan")
             .textContent =
-            formatValue(data.tegangan);
+            formatValue(
+                data.tegangan
+            );
 
 
-        document.getElementById("arus")
+
+        /* ================================================
+           ARUS
+           ================================================ */
+
+        document
+            .getElementById("arus")
             .textContent =
-            formatValue(data.arus);
+            formatValue(
+                data.arus
+            );
 
 
-        document.getElementById("suhu")
+
+        /* ================================================
+           SUHU
+           ================================================ */
+
+        document
+            .getElementById("suhu")
             .textContent =
-            formatValue(data.suhu);
+            formatValue(
+                data.suhu
+            );
 
 
-        document.getElementById("ph")
+
+        /* ================================================
+           PH
+           ================================================ */
+
+        document
+            .getElementById("ph")
             .textContent =
-            formatValue(data.ph);
+            formatValue(
+                data.ph
+            );
 
 
-        /* SAMPEL 1-10 */
+
+        /* ================================================
+           SAMPEL 1-10
+           ================================================ */
 
         for (
             let i = 1;
@@ -876,6 +1795,7 @@
         }
 
     }
+
 
 
     /* =====================================================
@@ -908,11 +1828,14 @@
 
                 data: [],
 
-                borderWidth: 2,
+                borderWidth:
+                    2,
 
-                tension: 0.3,
+                tension:
+                    0.3,
 
-                fill: false
+                fill:
+                    false
 
             });
 
@@ -921,37 +1844,53 @@
 
         conductivityChart =
             new Chart(
+
                 ctx,
+
                 {
 
-                    type: "line",
+                    type:
+                        "line",
 
-                    data: {
+                    data:
+                    {
 
-                        labels: [],
+                        labels:
+                            [],
 
                         datasets:
                             datasets
 
                     },
 
-                    options: {
 
-                        responsive: true,
+                    options:
+                    {
 
-                        maintainAspectRatio: false,
+                        responsive:
+                            true,
 
-                        interaction: {
+                        maintainAspectRatio:
+                            false,
 
-                            mode: "index",
 
-                            intersect: false
+                        interaction:
+                        {
+
+                            mode:
+                                "index",
+
+                            intersect:
+                                false
 
                         },
 
-                        plugins: {
 
-                            legend: {
+                        plugins:
+                        {
+
+                            legend:
+                            {
 
                                 position:
                                     "bottom"
@@ -960,13 +1899,18 @@
 
                         },
 
-                        scales: {
 
-                            x: {
+                        scales:
+                        {
 
-                                title: {
+                            x:
+                            {
 
-                                    display: true,
+                                title:
+                                {
+
+                                    display:
+                                        true,
 
                                     text:
                                         "Waktu"
@@ -975,11 +1919,15 @@
 
                             },
 
-                            y: {
 
-                                title: {
+                            y:
+                            {
 
-                                    display: true,
+                                title:
+                                {
+
+                                    display:
+                                        true,
 
                                     text:
                                         "Konduktivitas"
@@ -993,9 +1941,11 @@
                     }
 
                 }
+
             );
 
     }
+
 
 
     /* =====================================================
@@ -1014,74 +1964,101 @@
 
         parameterChart =
             new Chart(
+
                 ctx,
+
                 {
 
-                    type: "line",
+                    type:
+                        "line",
 
-                    data: {
 
-                        labels: [],
+                    data:
+                    {
 
-                        datasets: [
+                        labels:
+                            [],
+
+
+                        datasets:
+                        [
 
                             {
 
                                 label:
                                     "Tegangan (V)",
 
-                                data: [],
+                                data:
+                                    [],
 
-                                borderWidth: 2,
+                                borderWidth:
+                                    2,
 
-                                tension: 0.3,
+                                tension:
+                                    0.3,
 
-                                fill: false
+                                fill:
+                                    false
 
                             },
+
 
                             {
 
                                 label:
                                     "Arus (A)",
 
-                                data: [],
+                                data:
+                                    [],
 
-                                borderWidth: 2,
+                                borderWidth:
+                                    2,
 
-                                tension: 0.3,
+                                tension:
+                                    0.3,
 
-                                fill: false
+                                fill:
+                                    false
 
                             },
+
 
                             {
 
                                 label:
                                     "Suhu (°C)",
 
-                                data: [],
+                                data:
+                                    [],
 
-                                borderWidth: 2,
+                                borderWidth:
+                                    2,
 
-                                tension: 0.3,
+                                tension:
+                                    0.3,
 
-                                fill: false
+                                fill:
+                                    false
 
                             },
+
 
                             {
 
                                 label:
                                     "pH",
 
-                                data: [],
+                                data:
+                                    [],
 
-                                borderWidth: 2,
+                                borderWidth:
+                                    2,
 
-                                tension: 0.3,
+                                tension:
+                                    0.3,
 
-                                fill: false
+                                fill:
+                                    false
 
                             }
 
@@ -1089,23 +2066,34 @@
 
                     },
 
-                    options: {
 
-                        responsive: true,
+                    options:
+                    {
 
-                        maintainAspectRatio: false,
+                        responsive:
+                            true,
 
-                        interaction: {
+                        maintainAspectRatio:
+                            false,
 
-                            mode: "index",
 
-                            intersect: false
+                        interaction:
+                        {
+
+                            mode:
+                                "index",
+
+                            intersect:
+                                false
 
                         },
 
-                        plugins: {
 
-                            legend: {
+                        plugins:
+                        {
+
+                            legend:
+                            {
 
                                 position:
                                     "bottom"
@@ -1114,13 +2102,18 @@
 
                         },
 
-                        scales: {
 
-                            x: {
+                        scales:
+                        {
 
-                                title: {
+                            x:
+                            {
 
-                                    display: true,
+                                title:
+                                {
+
+                                    display:
+                                        true,
 
                                     text:
                                         "Waktu"
@@ -1129,11 +2122,15 @@
 
                             },
 
-                            y: {
 
-                                title: {
+                            y:
+                            {
 
-                                    display: true,
+                                title:
+                                {
+
+                                    display:
+                                        true,
 
                                     text:
                                         "Nilai"
@@ -1153,6 +2150,7 @@
     }
 
 
+
     /* =====================================================
        UPDATE GRAFIK
        ===================================================== */
@@ -1168,18 +2166,23 @@
 
         const labels =
             data.map(
+
                 item =>
                     formatDateTime(
                         item.created_at
                     )
+
             );
 
 
-        /* ============================
-           GRAFIK SAMPEL
-           ============================ */
 
-        conductivityChart.data.labels =
+        /* ================================================
+           GRAFIK KONDUKTIVITAS
+           ================================================ */
+
+        conductivityChart
+            .data
+            .labels =
             labels;
 
 
@@ -1193,11 +2196,14 @@
                 .data
                 .datasets[i - 1]
                 .data =
+
                 data.map(
+
                     item =>
                         item[
                             "konduktivitas_" + i
                         ]
+
                 );
 
         }
@@ -1206,57 +2212,77 @@
         conductivityChart.update();
 
 
-        /* ============================
-           GRAFIK PARAMETER UTAMA
-           ============================ */
 
-        parameterChart.data.labels =
+        /* ================================================
+           GRAFIK PARAMETER UTAMA
+           ================================================ */
+
+        parameterChart
+            .data
+            .labels =
             labels;
+
 
 
         parameterChart
             .data
             .datasets[0]
             .data =
+
             data.map(
+
                 item =>
                     item.tegangan
+
             );
+
 
 
         parameterChart
             .data
             .datasets[1]
             .data =
+
             data.map(
+
                 item =>
                     item.arus
+
             );
+
 
 
         parameterChart
             .data
             .datasets[2]
             .data =
+
             data.map(
+
                 item =>
                     item.suhu
+
             );
+
 
 
         parameterChart
             .data
             .datasets[3]
             .data =
+
             data.map(
+
                 item =>
                     item.ph
+
             );
 
 
         parameterChart.update();
 
     }
+
 
 
     /* =====================================================
@@ -1274,8 +2300,11 @@
         table.innerHTML = "";
 
 
+
         data.forEach(
+
             item => {
+
 
                 const row =
                     document.createElement(
@@ -1286,13 +2315,20 @@
                 let html = "";
 
 
+
+                /* WAKTU */
+
                 html +=
+
                     `<td>
                         ${formatDateTime(
                             item.created_at
                         )}
                     </td>`;
 
+
+
+                /* SAMPEL 1-10 */
 
                 for (
                     let i = 1;
@@ -1301,6 +2337,7 @@
                 ) {
 
                     html +=
+
                         `<td>
                             ${formatValue(
                                 item[
@@ -1312,7 +2349,11 @@
                 }
 
 
+
+                /* TEGANGAN */
+
                 html +=
+
                     `<td>
                         ${formatValue(
                             item.tegangan
@@ -1320,7 +2361,11 @@
                     </td>`;
 
 
+
+                /* ARUS */
+
                 html +=
+
                     `<td>
                         ${formatValue(
                             item.arus
@@ -1328,7 +2373,11 @@
                     </td>`;
 
 
+
+                /* SUHU */
+
                 html +=
+
                     `<td>
                         ${formatValue(
                             item.suhu
@@ -1336,12 +2385,17 @@
                     </td>`;
 
 
+
+                /* PH */
+
                 html +=
+
                     `<td>
                         ${formatValue(
                             item.ph
                         )}
                     </td>`;
+
 
 
                 row.innerHTML =
@@ -1353,36 +2407,49 @@
                 );
 
             }
+
         );
 
     }
 
 
+
     /* =====================================================
-       AMBIL DATA TERBARU
+       DATA TERBARU
        ===================================================== */
 
     async function getLatestData() {
 
         try {
 
+
             const {
+
                 data,
+
                 error
+
             } = await supabaseClient
 
-                .from(TABLE_NAME)
+                .from(
+                    TABLE_NAME
+                )
 
                 .select("*")
 
                 .order(
+
                     "created_at",
+
                     {
-                        ascending: false
+                        ascending:
+                            false
                     }
+
                 )
 
                 .limit(1);
+
 
 
             if (error) {
@@ -1391,11 +2458,14 @@
                     error
                 );
 
-                setConnection(false);
+                setConnection(
+                    false
+                );
 
                 return;
 
             }
+
 
 
             if (
@@ -1407,9 +2477,13 @@
                     data[0]
                 );
 
-                setConnection(true);
+
+                setConnection(
+                    true
+                );
 
             }
+
 
         }
 
@@ -1419,38 +2493,53 @@
                 error
             );
 
-            setConnection(false);
+
+            setConnection(
+                false
+            );
 
         }
 
     }
 
 
+
     /* =====================================================
-       AMBIL HISTORY DATA
+       HISTORY DATA
        ===================================================== */
 
     async function getHistory() {
 
         try {
 
+
             const {
+
                 data,
+
                 error
+
             } = await supabaseClient
 
-                .from(TABLE_NAME)
+                .from(
+                    TABLE_NAME
+                )
 
                 .select("*")
 
                 .order(
+
                     "created_at",
+
                     {
-                        ascending: false
+                        ascending:
+                            false
                     }
+
                 )
 
                 .limit(20);
+
 
 
             if (error) {
@@ -1464,15 +2553,13 @@
             }
 
 
+
             if (data) {
 
-                /* Karena data diambil
-                   dari terbaru ke terlama,
-                   dibalik agar grafik
-                   berjalan dari kiri ke kanan */
 
                 const history =
                     [...data].reverse();
+
 
 
                 updateCharts(
@@ -1486,6 +2573,7 @@
 
             }
 
+
         }
 
         catch (error) {
@@ -1499,11 +2587,13 @@
     }
 
 
+
     /* =====================================================
        REALTIME SUPABASE
        ===================================================== */
 
     function startRealtime() {
+
 
         supabaseClient
 
@@ -1511,21 +2601,27 @@
                 "monitoring-sampel"
             )
 
+
             .on(
 
                 "postgres_changes",
 
                 {
 
-                    event: "INSERT",
+                    event:
+                        "INSERT",
 
-                    schema: "public",
+                    schema:
+                        "public",
 
-                    table: TABLE_NAME
+                    table:
+                        TABLE_NAME
 
                 },
 
+
                 payload => {
+
 
                     console.log(
                         "Data baru:",
@@ -1549,8 +2645,11 @@
 
             )
 
+
             .subscribe(
+
                 status => {
+
 
                     console.log(
                         "Realtime:",
@@ -1570,9 +2669,11 @@
                     }
 
                 }
+
             );
 
     }
+
 
 
     /* =====================================================
@@ -1580,6 +2681,7 @@
        ===================================================== */
 
     async function exportToExcel() {
+
 
         const startDate =
             document
@@ -1620,9 +2722,10 @@
                 );
 
 
-        /* =========================
+
+        /* ================================================
            VALIDASI
-           ========================= */
+           ================================================ */
 
         if (
             !startDate ||
@@ -1640,16 +2743,23 @@
         }
 
 
+
         const startDateTime =
             new Date(
+
                 `${startDate}T${startTime}:00`
+
             );
+
 
 
         const endDateTime =
             new Date(
+
                 `${endDate}T${endTime}:59`
+
             );
+
 
 
         if (
@@ -1666,9 +2776,10 @@
         }
 
 
-        /* =========================
-           UBAH KE ISO
-           ========================= */
+
+        /* ================================================
+           ISO TIME
+           ================================================ */
 
         const startISO =
             startDateTime.toISOString();
@@ -1678,22 +2789,30 @@
             endDateTime.toISOString();
 
 
+
         try {
+
 
             info.textContent =
                 "Sedang mengambil data...";
 
 
-            /* =========================
-               AMBIL DATA SUPABASE
-               ========================= */
+
+            /* ============================================
+               QUERY SUPABASE
+               ============================================ */
 
             const {
+
                 data,
+
                 error
+
             } = await supabaseClient
 
-                .from(TABLE_NAME)
+                .from(
+                    TABLE_NAME
+                )
 
                 .select("*")
 
@@ -1708,11 +2827,16 @@
                 )
 
                 .order(
+
                     "created_at",
+
                     {
-                        ascending: true
+                        ascending:
+                            true
                     }
+
                 );
+
 
 
             if (error) {
@@ -1721,16 +2845,20 @@
                     error
                 );
 
+
                 alert(
                     "Gagal mengambil data dari Supabase."
                 );
 
+
                 info.textContent =
                     "Export gagal.";
+
 
                 return;
 
             }
+
 
 
             if (
@@ -1742,20 +2870,24 @@
                     "Tidak ada data pada rentang waktu yang dipilih."
                 );
 
+
                 info.textContent =
                     "Tidak ada data pada periode tersebut.";
+
 
                 return;
 
             }
 
 
-            /* =========================
-               UBAH DATA KE FORMAT EXCEL
-               ========================= */
+
+            /* ============================================
+               DATA EXCEL
+               ============================================ */
 
             const excelData =
                 data.map(
+
                     item => ({
 
                         "Waktu":
@@ -1763,55 +2895,71 @@
                                 item.created_at
                             ),
 
+
                         "Konduktivitas Sampel 1":
                             item.konduktivitas_1,
+
 
                         "Konduktivitas Sampel 2":
                             item.konduktivitas_2,
 
+
                         "Konduktivitas Sampel 3":
                             item.konduktivitas_3,
+
 
                         "Konduktivitas Sampel 4":
                             item.konduktivitas_4,
 
+
                         "Konduktivitas Sampel 5":
                             item.konduktivitas_5,
+
 
                         "Konduktivitas Sampel 6":
                             item.konduktivitas_6,
 
+
                         "Konduktivitas Sampel 7":
                             item.konduktivitas_7,
+
 
                         "Konduktivitas Sampel 8":
                             item.konduktivitas_8,
 
+
                         "Konduktivitas Sampel 9":
                             item.konduktivitas_9,
+
 
                         "Konduktivitas Sampel 10":
                             item.konduktivitas_10,
 
+
                         "Tegangan (V)":
                             item.tegangan,
+
 
                         "Arus (A)":
                             item.arus,
 
+
                         "Suhu (°C)":
                             item.suhu,
+
 
                         "pH":
                             item.ph
 
                     })
+
                 );
 
 
-            /* =========================
-               BUAT WORKSHEET
-               ========================= */
+
+            /* ============================================
+               WORKSHEET
+               ============================================ */
 
             const worksheet =
                 XLSX.utils.json_to_sheet(
@@ -1819,113 +2967,143 @@
                 );
 
 
-            /* =========================
+
+            /* ============================================
                LEBAR KOLOM
-               ========================= */
+               ============================================ */
 
             worksheet["!cols"] = [
 
                 {
-                    wch: 22
+                    wch:
+                        22
                 },
 
                 {
-                    wch: 20
+                    wch:
+                        22
                 },
 
                 {
-                    wch: 20
+                    wch:
+                        22
                 },
 
                 {
-                    wch: 20
+                    wch:
+                        22
                 },
 
                 {
-                    wch: 20
+                    wch:
+                        22
                 },
 
                 {
-                    wch: 20
+                    wch:
+                        22
                 },
 
                 {
-                    wch: 20
+                    wch:
+                        22
                 },
 
                 {
-                    wch: 20
+                    wch:
+                        22
                 },
 
                 {
-                    wch: 20
+                    wch:
+                        22
                 },
 
                 {
-                    wch: 20
+                    wch:
+                        22
                 },
 
                 {
-                    wch: 20
+                    wch:
+                        22
                 },
 
                 {
-                    wch: 15
+                    wch:
+                        15
                 },
 
                 {
-                    wch: 15
+                    wch:
+                        15
                 },
 
                 {
-                    wch: 15
+                    wch:
+                        15
                 },
 
                 {
-                    wch: 12
+                    wch:
+                        12
                 }
 
             ];
 
 
-            /* =========================
-               BUAT WORKBOOK
-               ========================= */
+
+            /* ============================================
+               WORKBOOK
+               ============================================ */
 
             const workbook =
                 XLSX.utils.book_new();
 
 
+
             XLSX.utils.book_append_sheet(
+
                 workbook,
+
                 worksheet,
+
                 "Data Monitoring"
+
             );
 
 
-            /* =========================
+
+            /* ============================================
                NAMA FILE
-               ========================= */
+               ============================================ */
 
             const fileName =
+
                 `Data_Monitoring_${startDate}_${endDate}.xlsx`;
 
 
-            /* =========================
+
+            /* ============================================
                DOWNLOAD
-               ========================= */
+               ============================================ */
 
             XLSX.writeFile(
+
                 workbook,
+
                 fileName
+
             );
 
 
-            /* =========================
+
+            /* ============================================
                INFORMASI EXPORT
-               ========================= */
+               ============================================ */
 
             info.innerHTML =
+
                 `Berhasil export <b>${data.length}</b> data.
                 Periode:
                 <b>${startDate} ${startTime}</b>
@@ -1937,13 +3115,16 @@
 
         catch (error) {
 
+
             console.error(
                 error
             );
 
+
             alert(
                 "Terjadi kesalahan saat export data."
             );
+
 
             info.textContent =
                 "Export gagal.";
@@ -1953,11 +3134,13 @@
     }
 
 
+
     /* =====================================================
-       SET TANGGAL DEFAULT
+       TANGGAL DEFAULT
        ===================================================== */
 
     function setDefaultDate() {
+
 
         const now =
             new Date();
@@ -1968,25 +3151,31 @@
 
 
         const month =
+
             String(
                 now.getMonth() + 1
-            ).padStart(
+            )
+            .padStart(
                 2,
                 "0"
             );
 
 
         const day =
+
             String(
                 now.getDate()
-            ).padStart(
+            )
+            .padStart(
                 2,
                 "0"
             );
 
 
         const today =
+
             `${year}-${month}-${day}`;
+
 
 
         document
@@ -1995,6 +3184,7 @@
             )
             .value =
             today;
+
 
 
         document
@@ -2007,16 +3197,20 @@
     }
 
 
+
     /* =====================================================
        INISIALISASI
        ===================================================== */
 
     async function init() {
 
+
         console.log(
             "Memulai sistem monitoring..."
         );
 
+
+        /* Buat grafik */
 
         createConductivityChart();
 
@@ -2024,18 +3218,27 @@
         createParameterChart();
 
 
+        /* Set tanggal export */
+
         setDefaultDate();
 
+
+        /* Ambil data terakhir */
 
         await getLatestData();
 
 
+        /* Ambil history */
+
         await getHistory();
 
+
+        /* Aktifkan realtime */
 
         startRealtime();
 
     }
+
 
 
     /* =====================================================
@@ -2044,7 +3247,10 @@
 
     init();
 
+
 </script>
 
+
 </body>
+
 </html>
